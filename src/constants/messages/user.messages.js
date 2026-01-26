@@ -1,0 +1,46 @@
+const CMSMessages = {
+  // AUTH messages
+  AUTH_SIGNUP: "Please check your email to confirm your account.",
+  AUTH_LOGIN: "Login successfully",
+  AUTH_LOGOUT: "Logout successfully",
+  AUTH_VERIFY: "Verify Successfully",
+  AUTH_PASSWORD_SET: "Password Set successfully",
+  AUTH_FORGET_PASSWORD: "Forget password mail send successfully",
+  AUTH_PASSWORD_NOT_MATCH: "Password not match",
+  AUTH_INVALID_TOKEN: "Invalid Token",
+  AUTH_INVALID_OTP: "Invalid OTP",
+  AUTH_VERIFY_OTP: "Verify Successfully",
+  AUTH_OTP_SENT: "OTP Sent Successfully",
+  AUTH_NO_USER: "Invalid Login Credentials",
+  //Response message
+  GET: "Get Successfully",
+  UPDATE: "Update Successfully",
+  DELETE: "Delete Successfully",
+  ADD: "Add Successfully",
+  //Invalid messages
+  INVALID_CREDENTIAL: "Invalid Credential",
+  INVALID_OBJECT_ID: "Invalid ObjectId",
+  //Others messages
+  EMAIL_EXIT: "Email Already Exist ",
+  GRANT_PERMISSION: "Grant All Permissions",
+  NO_PERMISSION: "You haven't Permissions",
+  NOT_FOUND: "Not Found",
+  ALREADY_REQUESTED:"Request already added",
+  LIMIT_EXCEED: " Image Limit Exceed",
+  IMAGE_REQUIRED: "Upload Atleast One Image",
+  MEETING_EXIST: "A meeting has already been scheduled ",
+  MEETING_DATE_TIME: "Meeting can only be scheduled for future time.",
+  FRIEND_REQUEST: "Friend request already sent to this user",
+  OWN_MEETING: "Cannot schedule Own meeting",
+  INACTIVE_ACCOUNT: "Sorry Your Account Is Not Active",
+  SCHEDULE_MEETING: "Your Meeting has been scheduled",
+  DELETE_MEETING: "Your Meeting has been cancelled",
+  UPDATE_MEETING: "Your Meeting has been updated",
+  CONFIRMED_MEETING: "Your Meeting has been confirmed",
+  DECLINED_MEETING: "Your Meeting has been declined",
+  NOT_FOUND_EMAIL: "This email address is not registered with Tranquil",
+  OTP_EXPIRED: "The OTP has expired. Please request a new OTP.",
+  CONTACT_ADD: "Thank you for contacting us! Your message has been successfully submitted. We appreciate your interest and will get back to you as soon as possible.",
+
+};
+module.exports = CMSMessages;

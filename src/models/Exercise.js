@@ -1,0 +1,64 @@
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
+
+const ExerciseSchema = new Schema(
+{
+    level_id: {
+      type: mongoose.Schema.ObjectId,
+      ref:"CourseLevel",
+      required: true
+    },
+    lesson_id: {
+      type: mongoose.Schema.ObjectId,
+      ref:"Lesson",
+    },
+    title: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String
+    },
+    type: {
+      type: String,
+      enum: [ "fill_blank", "multiple_choice", "matching", "short_answer", "listening", "speaking" ],
+      required: true
+    },
+    difficulty: {
+      type: String,
+      enum: [ "easy", "medium", "hard" ],
+      default: "medium"
+    },
+    content: {
+      instruction: {
+        type: String
+      },
+      passage: {
+        type: String
+      },
+      audio_url: {
+        type: String
+      },
+      items: [ {
+          type: Object
+        } ]
+    },
+    time_limit_minutes: {
+      type: Number,
+      default: 10
+    },
+    points: {
+      type: Number,
+      default: 10
+    },
+    is_active: {
+      type: Boolean,
+      default: true
+    },
+    display_order: {
+      type: Number,
+      default: 0
+    }
+  }, { timestamps: true });
+
+module.exports = mongoose.model('Exercise', ExerciseSchema);

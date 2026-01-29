@@ -33,6 +33,12 @@ const userSchema = new mongoose.Schema(
     avatar_url: {
       type: String
     },
+    googleId: {
+      type: String,
+      index: true,
+      sparse: true
+    },
+
     learning_languages: [String],
     learning_interests: [String],
     onboarding_completed: {
@@ -64,7 +70,10 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: "attribute",
     },
-
+    loginType: {
+      type: String,
+      default: "manual"
+    },
     /* ================= CONTACT ================= */
     phone: String,
     phoneNo: String,

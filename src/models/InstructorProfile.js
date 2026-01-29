@@ -32,11 +32,21 @@ const InstructorProfileSchema = new Schema(
       enum: [ "pending", "approved", "rejected" ],
       default: "pending"
     },
+    phone:{
+      type:Number
+    },
+    resume_url:{
+      type:String
+    },
+    phone_number:{
+   type:String
+    },
     payment_type: {
       type: String,
       enum: [ "monthly", "hourly" ],
       default: "hourly"
     },
+    
     monthly_salary: {
       type: Number,
       default: 0

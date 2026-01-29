@@ -6,6 +6,6 @@ const express = require("express");
 
   router.post("/sendOTP", functionsController.sendOTP);
   router.post("/verifyOTP", functionsController.verifyOTP);
-
+router.post('/verifyGoogleToken',functionsController.verifyGoogleToken)
   module.exports = router;
   

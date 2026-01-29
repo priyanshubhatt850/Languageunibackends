@@ -58,7 +58,7 @@ module.exports.sendAllMail = async function (data, to, html, subject, from) {
 
   const mailOptions = {
     from: from,
-    to: process.env.NODE_ENV === 'development' ? 'pankaj.joshi@qpxtra.com' : to,
+    to: process.env.NODE_ENV === 'development' ? 'priyanshub850@gmail.com' : to,
     subject: subject,
     html: htmlToSend,
   };

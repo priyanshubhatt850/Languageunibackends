@@ -92,4 +92,11 @@ const InstructorProfileSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+InstructorProfileSchema.index({ user_id: 1 });
+InstructorProfileSchema.index({ display_name: 1 });
+InstructorProfileSchema.index({ verification_status: 1 });
+InstructorProfileSchema.index({ payment_type: 1 });
+InstructorProfileSchema.index({ average_rating: -1 });
+
 module.exports = mongoose.model('InstructorProfile', InstructorProfileSchema);

@@ -29,4 +29,11 @@ const MessageSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+MessageSchema.index({ sender_id: 1 });
+MessageSchema.index({ recipient_id: 1 });
+MessageSchema.index({ is_read: 1 });
+MessageSchema.index({ thread_id: 1 });
+MessageSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Message', MessageSchema);

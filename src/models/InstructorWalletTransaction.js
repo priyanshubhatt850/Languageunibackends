@@ -36,4 +36,10 @@ const InstructorWalletTransactionSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+InstructorWalletTransactionSchema.index({ instructor_id: 1 });
+InstructorWalletTransactionSchema.index({ type: 1 });
+InstructorWalletTransactionSchema.index({ source: 1 });
+InstructorWalletTransactionSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('InstructorWalletTransaction', InstructorWalletTransactionSchema);

@@ -26,4 +26,8 @@ const WalletSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+WalletSchema.index({ instructor_id: 1 });
+WalletSchema.index({ balance: -1 });
+
 module.exports = mongoose.model('Wallet', WalletSchema);

@@ -64,4 +64,10 @@ const QuizSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+QuizSchema.index({ course_id: 1 });
+QuizSchema.index({ lesson_id: 1 });
+QuizSchema.index({ type: 1 });
+QuizSchema.index({ is_active: 1 });
+
 module.exports = mongoose.model('Quiz', QuizSchema);

@@ -28,4 +28,8 @@ const BadgeSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+BadgeSchema.index({ name: 1 });
+BadgeSchema.index({ rarity: 1 });
+
 module.exports = mongoose.model('Badge', BadgeSchema);

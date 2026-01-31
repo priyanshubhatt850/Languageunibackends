@@ -75,4 +75,11 @@ const LessonSchema = new Schema(
       } ]
   }, { timestamps: true });
 
+// Indexes
+LessonSchema.index({ course_id: 1 });
+LessonSchema.index({ order: 1 });
+LessonSchema.index({ type: 1 });
+LessonSchema.index({ is_free_preview: 1 });
+LessonSchema.index({ level: 1 });
+
 module.exports = mongoose.model('Lesson', LessonSchema);

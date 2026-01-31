@@ -26,4 +26,10 @@ const OTPVerificationSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+OTPVerificationSchema.index({ email: 1 });
+OTPVerificationSchema.index({ service_type: 1 });
+OTPVerificationSchema.index({ verified: 1 });
+OTPVerificationSchema.index({ expires_at: 1 });
+
 module.exports = mongoose.model('OTPVerification', OTPVerificationSchema);

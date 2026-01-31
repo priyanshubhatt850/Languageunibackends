@@ -17,6 +17,10 @@ const EnrollmentSchema = new Schema(
       type: mongoose.Schema.ObjectId,
       ref:"users"
     },
+    courseTransactionId:{
+       type:mongoose.Schema.ObjectId,
+        ref:"courseTransactions"
+    },
     status: {
       type: String,
       enum: [ "active", "completed", "cancelled", "expired" ],
@@ -57,5 +61,13 @@ const EnrollmentSchema = new Schema(
       type: String
     }
   }, { timestamps: true });
+
+// Indexes
+EnrollmentSchema.index({ user_id: 1 });
+EnrollmentSchema.index({ course_id: 1 });
+EnrollmentSchema.index({ instructor_id: 1 });
+EnrollmentSchema.index({ status: 1 });
+EnrollmentSchema.index({ payment_status: 1 });
+EnrollmentSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Enrollment', EnrollmentSchema);

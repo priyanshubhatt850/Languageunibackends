@@ -50,4 +50,12 @@ const QuizAttemptSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+QuizAttemptSchema.index({ quiz_id: 1 });
+QuizAttemptSchema.index({ user_id: 1 });
+QuizAttemptSchema.index({ course_id: 1 });
+QuizAttemptSchema.index({ status: 1 });
+QuizAttemptSchema.index({ passed: 1 });
+QuizAttemptSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('QuizAttempt', QuizAttemptSchema);

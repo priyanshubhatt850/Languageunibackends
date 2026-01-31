@@ -28,5 +28,5 @@ module.exports = {
   Wallet: require("./Wallet"),
   UserModel: require('./User'),
   OTPVerification: require("./OTPVerification"),
-
+  CourseTransaction: require("./courseTransactionsModel"),
 };

@@ -61,4 +61,12 @@ const ExerciseSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+ExerciseSchema.index({ level_id: 1 });
+ExerciseSchema.index({ lesson_id: 1 });
+ExerciseSchema.index({ type: 1 });
+ExerciseSchema.index({ difficulty: 1 });
+ExerciseSchema.index({ is_active: 1 });
+ExerciseSchema.index({ display_order: 1 });
+
 module.exports = mongoose.model('Exercise', ExerciseSchema);

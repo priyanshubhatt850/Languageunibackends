@@ -95,7 +95,10 @@ const userSchema = new mongoose.Schema(
         default: [0, 0],
       },
     },
-
+    issuperadmin:{
+    type:Boolean
+,
+    default:false},
     /* ================= STATUS ================= */
     status: {
       type: String,

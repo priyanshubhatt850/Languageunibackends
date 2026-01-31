@@ -40,4 +40,10 @@ const ChatConversationSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+ChatConversationSchema.index({ student_id: 1 });
+ChatConversationSchema.index({ course_id: 1 });
+ChatConversationSchema.index({ status: 1 });
+ChatConversationSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('ChatConversation', ChatConversationSchema);

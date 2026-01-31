@@ -63,4 +63,12 @@ const CourseLevelSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+CourseLevelSchema.index({ language_id: 1 });
+CourseLevelSchema.index({ level_name: 1 });
+CourseLevelSchema.index({ level_type: 1 });
+CourseLevelSchema.index({ instructor_id: 1 });
+CourseLevelSchema.index({ status: 1 });
+CourseLevelSchema.index({ display_order: 1 });
+
 module.exports = mongoose.model('CourseLevel', CourseLevelSchema);

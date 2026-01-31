@@ -30,4 +30,10 @@ const NotificationSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+NotificationSchema.index({ user_id: 1 });
+NotificationSchema.index({ type: 1 });
+NotificationSchema.index({ is_read: 1 });
+NotificationSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Notification', NotificationSchema);

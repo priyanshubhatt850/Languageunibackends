@@ -26,4 +26,11 @@ const ReviewSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+ReviewSchema.index({ course_id: 1 });
+ReviewSchema.index({ user_id: 1 });
+ReviewSchema.index({ rating: -1 });
+ReviewSchema.index({ is_approved: 1 });
+ReviewSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Review', ReviewSchema);

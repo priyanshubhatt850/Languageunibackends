@@ -18,4 +18,9 @@ const UserBadgeSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+UserBadgeSchema.index({ user_id: 1 });
+UserBadgeSchema.index({ badge_id: 1 });
+UserBadgeSchema.index({ earned_date: 1 });
+
 module.exports = mongoose.model('UserBadge', UserBadgeSchema);

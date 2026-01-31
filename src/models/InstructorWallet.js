@@ -26,4 +26,7 @@ const InstructorWalletSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+InstructorWalletSchema.index({ instructor_id: 1 });
+
 module.exports = mongoose.model('InstructorWallet', InstructorWalletSchema);

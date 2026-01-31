@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Middleware
-// const { authMiddleware } = require("../middleware");
+const { authMiddleware } = require("../middleware");
 
 // Controllers
 const { enrollmentController } = require("../controllers");
@@ -15,4 +15,6 @@ router.delete("/:id", enrollmentController.delete);
 router.post("/filter", enrollmentController.filter);
 router.post("/", enrollmentController.create);
 router.post("/deleteMany", enrollmentController.deleteMany);
+router.post('/startPaypalPayment',authMiddleware,enrollmentController.startPaypalPayment)
+router.post('/paypalSuccess',enrollmentController.paypalSuccess)
 module.exports = router;

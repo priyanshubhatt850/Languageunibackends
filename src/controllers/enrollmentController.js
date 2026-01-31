@@ -63,6 +63,22 @@ class EnrollmentController {
       next(err);
     }
   }
+  async startPaypalPayment(req,res,next){
+    try {
+      const data = await enrollmentService.startPaypalPayment(req);
+      return res.json(data);
+    } catch(error){
+      next(error);
+    }
+  }
+  async paypalSuccess (req,res,next){
+    try {
+   const data = await enrollmentService.paypalSuccess(req)
+   return res.json(data)
+    } catch(error){
+      next(error)
+    }
+  }
 }
 
 module.exports = new EnrollmentController();

@@ -130,4 +130,13 @@ const CourseSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+CourseSchema.index({ createdBy: 1 });
+CourseSchema.index({ language: 1 });
+CourseSchema.index({ level: 1 });
+CourseSchema.index({ instructor_id: 1 });
+CourseSchema.index({ status: 1 });
+CourseSchema.index({ category: 1 });
+CourseSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Course', CourseSchema);

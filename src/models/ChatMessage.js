@@ -26,4 +26,9 @@ const ChatMessageSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+ChatMessageSchema.index({ conversation_id: 1 });
+ChatMessageSchema.index({ sender_id: 1 });
+ChatMessageSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('ChatMessage', ChatMessageSchema);

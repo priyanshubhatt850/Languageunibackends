@@ -62,4 +62,11 @@ const StudentCourseLevelProgressSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+StudentCourseLevelProgressSchema.index({ user_id: 1 });
+StudentCourseLevelProgressSchema.index({ course_level_id: 1 });
+StudentCourseLevelProgressSchema.index({ language_id: 1 });
+StudentCourseLevelProgressSchema.index({ status: 1 });
+StudentCourseLevelProgressSchema.index({ progress_percentage: -1 });
+
 module.exports = mongoose.model('StudentCourseLevelProgress', StudentCourseLevelProgressSchema);

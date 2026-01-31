@@ -62,4 +62,13 @@ const FlashcardSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+FlashcardSchema.index({ level_id: 1 });
+FlashcardSchema.index({ lesson_id: 1 });
+FlashcardSchema.index({ deck_name: 1 });
+FlashcardSchema.index({ category: 1 });
+FlashcardSchema.index({ difficulty: 1 });
+FlashcardSchema.index({ is_public: 1 });
+FlashcardSchema.index({ display_order: 1 });
+
 module.exports = mongoose.model('Flashcard', FlashcardSchema);

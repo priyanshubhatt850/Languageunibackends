@@ -48,4 +48,11 @@ const ExerciseAttemptSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+ExerciseAttemptSchema.index({ exercise_id: 1 });
+ExerciseAttemptSchema.index({ user_id: 1 });
+ExerciseAttemptSchema.index({ level_id: 1 });
+ExerciseAttemptSchema.index({ status: 1 });
+ExerciseAttemptSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('ExerciseAttempt', ExerciseAttemptSchema);

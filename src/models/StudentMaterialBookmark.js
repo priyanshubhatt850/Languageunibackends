@@ -24,4 +24,10 @@ const StudentMaterialBookmarkSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+StudentMaterialBookmarkSchema.index({ user_id: 1 });
+StudentMaterialBookmarkSchema.index({ material_id: 1 });
+StudentMaterialBookmarkSchema.index({ level_id: 1 });
+StudentMaterialBookmarkSchema.index({ is_bookmarked: 1 });
+
 module.exports = mongoose.model('StudentMaterialBookmark', StudentMaterialBookmarkSchema);

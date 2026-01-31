@@ -56,4 +56,12 @@ const TeachingSessionSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+TeachingSessionSchema.index({ instructor_id: 1 });
+TeachingSessionSchema.index({ student_id: 1 });
+TeachingSessionSchema.index({ course_level_id: 1 });
+TeachingSessionSchema.index({ session_date: 1 });
+TeachingSessionSchema.index({ status: 1 });
+TeachingSessionSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('TeachingSession', TeachingSessionSchema);

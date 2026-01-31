@@ -32,4 +32,10 @@ const LanguageSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+LanguageSchema.index({ name: 1 });
+LanguageSchema.index({ code: 1 });
+LanguageSchema.index({ is_active: 1 });
+LanguageSchema.index({ display_order: 1 });
+
 module.exports = mongoose.model('Language', LanguageSchema);

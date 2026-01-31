@@ -34,4 +34,10 @@ const UserPointsSchema = new Schema(
       } ]
   }, { timestamps: true });
 
+// Indexes
+UserPointsSchema.index({ user_id: 1 });
+UserPointsSchema.index({ total_points: -1 });
+UserPointsSchema.index({ level: -1 });
+UserPointsSchema.index({ rank: 1 });
+
 module.exports = mongoose.model('UserPoints', UserPointsSchema);

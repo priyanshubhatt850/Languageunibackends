@@ -27,4 +27,11 @@ const InstructorRatingSchema = new Schema(
     }
   }, { timestamps: true });
 
+// Indexes
+InstructorRatingSchema.index({ student_id: 1 });
+InstructorRatingSchema.index({ instructor_id: 1 });
+InstructorRatingSchema.index({ course_id: 1 });
+InstructorRatingSchema.index({ rating: -1 });
+InstructorRatingSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('InstructorRating', InstructorRatingSchema);

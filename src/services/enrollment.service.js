@@ -1,8 +1,15 @@
 const Enrollment = require("../models/Enrollment");
+const CourseLevel = require('../models/CourseLevel')
+const StudyMaterial = require('../models/StudyMaterial')
 const courseTransactionsModel = require("../models/courseTransactionsModel");
 const moment = require('moment')
 const paypal = require('paypal-rest-sdk');
 const axios = require("axios");
+const mongoose = require("mongoose");
+const crypto = require("crypto");
+const ALGORITHM = "aes-256-cbc";
+const KEY = Buffer.from(process.env.MATERIAL_ENCRYPTION_KEY, "utf8"); // 32 bytes
+const IV_LENGTH = 16;
 
 paypal.configure({
   mode: process.env.Paypal_Mode,
@@ -51,7 +58,7 @@ class EnrollmentService {
   }
   async startPaypalPayment(req = {}) {
     try {
-      const { amount, redirectRoute, levelId, userCountry, ip,instructor_id } = req.body;
+      const { amount, redirectRoute, levelId, userCountry, ip, instructor_id } = req.body;
       let todaysDate = moment().format("YYYY-MM-DD");
       const token = await generateAccessToken();
       let paymentDetails = {
@@ -60,24 +67,24 @@ class EnrollmentService {
         levelId: levelId,
         status: "pending",
         payment_type: "Paypal",
-        country: userCountry||'',
-        userIp: ip||''
+        country: userCountry || '',
+        userIp: ip || ''
       };
-      
-      
+
+
       const courseTransactions = await courseTransactionsModel.create(paymentDetails);
       let coursepaymentDetails = {
-        user_id:req.user._id,
-        instructor_id:instructor_id,
-        course_id:levelId,
-        payment_amount:amount,
-        payment_status:'pending',
-        status:'active',
-        enrolled_date:todaysDate,
-        start_date:todaysDate,
-        courseTransactionId:courseTransactions._id
+        user_id: req.user._id,
+        instructor_id: instructor_id,
+        course_id: levelId,
+        payment_amount: amount,
+        payment_status: 'pending',
+        status: 'active',
+        enrolled_date: todaysDate,
+        start_date: todaysDate,
+        courseTransactionId: courseTransactions._id
       }
-   
+
       const enrollment = await Enrollment.create(coursepaymentDetails)
 
       let custom = {
@@ -86,11 +93,11 @@ class EnrollmentService {
         transaction_id: courseTransactions._id,
         payment_type: "Paypal",
       };
-         // country: userCountry,
-    
+      // country: userCountry,
 
-   
-         const payload = {
+
+
+      const payload = {
         intent: "CAPTURE",
         purchase_units: [
           {
@@ -130,16 +137,220 @@ class EnrollmentService {
         logger.error({ message: "Failed to initialize Paypal. Capture also missing" });
         return false;
       }
-      return { success: true, link: link.href, paypal: response.data};
+      return { success: true, link: link.href, paypal: response.data };
 
     } catch (error) {
       console.log(error)
     }
   }
+
+  async getcoursematerialDetails(req = {}) {
+    try {
+      const { levelId } = req.query;
+      const userId = req.user._id;
+
+      if (!mongoose.Types.ObjectId.isValid(levelId)) {
+        return { success: false, message: "Invalid level id" };
+      }
+
+      /* -----------------------------
+         1️⃣ LIGHTWEIGHT AGGREGATION
+         ----------------------------- */
+      const [result] = await CourseLevel.aggregate([
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(levelId),
+            status: "published"
+          }
+        },
+
+        // Language
+        {
+          $lookup: {
+            from: "languages",
+            localField: "language_id",
+            foreignField: "_id",
+            as: "language"
+          }
+        },
+
+        // Enrollment check (FAST with index)
+        {
+          $lookup: {
+            from: "enrollments",
+            let: {
+              levelId: "$_id",
+              userId: new mongoose.Types.ObjectId(userId)
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$course_id", "$$levelId"] },
+                      { $eq: ["$user_id", "$$userId"] },
+                      { $eq: ["$payment_status", "completed"] }
+                    ]
+                  }
+                }
+              },
+              { $limit: 1 }
+            ],
+            as: "enrollment"
+          }
+        },
+
+        // Shape response
+        {
+          $addFields: {
+            language: { $arrayElemAt: ["$language", 0] },
+            enrollment: { $arrayElemAt: ["$enrollment", 0] },
+            hasAccess: {
+              $gt: [{ $size: "$enrollment" }, 0]
+            }
+          }
+        },
+
+        {
+          $project: {
+            __v: 0
+          }
+        }
+      ]);
+
+      if (!result) {
+        return { success: false, message: "Level not found" };
+      }
+
+      /* ---------------------------------
+         2️⃣ FETCH MATERIALS ONLY IF PAID
+         --------------------------------- */
+      let encryptedMaterials = [];
+
+      const rawMaterials = await StudyMaterial
+        .find({ level_id: levelId })
+        .sort({ display_order: 1 })
+        .lean();
+
+      if (rawMaterials.length) {
+        encryptedMaterials = encrypt(rawMaterials);
+      }
+
+
+      /* ---------------------------------
+         3️⃣ REMOVE PLAINTEXT MATERIALS
+         --------------------------------- */
+      delete result.materials;
+
+      /* ---------------------------------
+         4️⃣ FINAL RESPONSE
+         --------------------------------- */
+      return ({
+        success: true,
+        level: result,
+        language: result.language,
+        materials: encryptedMaterials,   // 🔐 encrypted only
+        enrollment: result.enrollment || null,
+        hasAccess: result.hasAccess
+      });
+
+    } catch (error) {
+      console.error("getcoursematerialDetails error:", error);
+      return {
+        success: false,
+        message: "Server error"
+      };
+    }
+  }
+  async getallmycourseList(req = {}) {
+    const userId = req.user._id;
+    const pipeLine = [
+      {
+        $match: {
+          user_id: new mongoose.Types.ObjectId(userId),
+          payment_status: "completed"
+        }
+      },
+      {
+        $lookup: {
+          from: "courselevels",
+          localField: "course_id",
+          foreignField: "_id",
+          as: "courseDetails"
+        }
+      },
+      { $unwind: "$courseDetails" },
+
+      {
+        $lookup: {
+          from: "languages",
+          localField: "courseDetails.language_id",
+          foreignField: "_id",
+          as: "languageDetails"
+        }
+      },
+      { $unwind: "$languageDetails" },
+
+      // 🔥 MATERIAL COUNT ONLY
+      {
+        $lookup: {
+          from: "studymaterials",
+          let: { courseId: "$course_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$level_id", "$$courseId"] }
+              }
+            },
+            { $count: "count" }
+          ],
+          as: "materialCount"
+        }
+      },
+
+      // 🔥 Extract number safely
+      {
+        $addFields: {
+          totalMaterials: {
+            $ifNull: [{ $arrayElemAt: ["$materialCount.count", 0] }, 0]
+          }
+        }
+      },
+
+      // ❌ Remove temp field
+      {
+        $project: {
+          materialCount: 0,
+          __v: 0,
+          "courseDetails.__v": 0,
+          "languageDetails.__v": 0
+        }
+      }
+    ];
+
+
+    const data = await Enrollment.aggregate(pipeLine);
+    return data;
+
+  }
+
   async paypalSuccess(req = {}) {
 
   }
 }
+const encrypt = (data) => {
+  const iv = crypto.randomBytes(IV_LENGTH);
+
+  const cipher = crypto.createCipheriv(ALGORITHM, KEY, iv);
+  let encrypted = cipher.update(JSON.stringify(data), "utf8", "hex");
+  encrypted += cipher.final("hex");
+
+  return {
+    iv: iv.toString("hex"),
+    content: encrypted
+  };
+};
+
 
 const generateAccessToken = async () => {
   try {

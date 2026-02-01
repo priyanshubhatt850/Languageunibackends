@@ -9,6 +9,8 @@ const { enrollmentController } = require("../controllers");
 
 // Routes
 router.get("/", enrollmentController.list);
+router.get('/getCoursematerialDetails',authMiddleware,enrollmentController.getCoursematerialdetails),
+router.get('/getallcourseList',authMiddleware,enrollmentController.getallMycourseList)
 router.get("/:id", enrollmentController.getById);
 router.put("/:id", enrollmentController.update);
 router.delete("/:id", enrollmentController.delete);

@@ -71,6 +71,24 @@ class EnrollmentController {
       next(error);
     }
   }
+  async getCoursematerialdetails (req,res,next){
+    try {
+    const data = await enrollmentService.getcoursematerialDetails(req)
+    return res.json(data)
+     } catch(error){
+      console.log(error);
+      next(error)
+     }
+  }
+  async getallMycourseList(req,res,next) {
+    try {
+    const data  = await enrollmentService.getallmycourseList(req)
+    return res.json(data)
+    } catch(error){
+      console.log(error);
+      next(error)
+    }
+  }
   async paypalSuccess (req,res,next){
     try {
    const data = await enrollmentService.paypalSuccess(req)

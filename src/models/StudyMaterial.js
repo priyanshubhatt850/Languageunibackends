@@ -49,5 +49,6 @@ StudyMaterialSchema.index({ title: 1 });
 StudyMaterialSchema.index({ material_type: 1 });
 StudyMaterialSchema.index({ is_free_preview: 1 });
 StudyMaterialSchema.index({ display_order: 1 });
+StudyMaterialSchema.index({ level_id: 1, display_order: 1 }); // Compound index for sorted material queries
 
 module.exports = mongoose.model('StudyMaterial', StudyMaterialSchema);

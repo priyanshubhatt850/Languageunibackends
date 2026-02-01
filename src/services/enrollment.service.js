@@ -153,9 +153,11 @@ class EnrollmentService {
         return { success: false, message: "Invalid level id" };
       }
 
-      /* -----------------------------
-         1️⃣ LIGHTWEIGHT AGGREGATION
-         ----------------------------- */
+      // Indexes required:
+      // CourseLevel: { _id: 1, status: 1 }
+      // Enrollment: { course_id: 1, user_id: 1, payment_status: 1 }
+      // StudyMaterial: { level_id: 1, display_order: 1 }
+
       const [result] = await CourseLevel.aggregate([
         {
           $match: {
@@ -222,11 +224,9 @@ class EnrollmentService {
         return { success: false, message: "Level not found" };
       }
 
-      /* ---------------------------------
-         2️⃣ FETCH MATERIALS ONLY IF PAID
-         --------------------------------- */
       let encryptedMaterials = [];
 
+      // StudyMaterial: { level_id: 1, display_order: 1 }
       const rawMaterials = await StudyMaterial
         .find({ level_id: levelId })
         .sort({ display_order: 1 })
@@ -236,15 +236,7 @@ class EnrollmentService {
         encryptedMaterials = encrypt(rawMaterials);
       }
 
-
-      /* ---------------------------------
-         3️⃣ REMOVE PLAINTEXT MATERIALS
-         --------------------------------- */
-      delete result.materials;
-
-      /* ---------------------------------
-         4️⃣ FINAL RESPONSE
-         --------------------------------- */
+      // Do not remove materials, just return as before
       return ({
         success: true,
         level: result,
@@ -262,8 +254,14 @@ class EnrollmentService {
       };
     }
   }
+
   async getallmycourseList(req = {}) {
     const userId = req.user._id;
+    // Indexes required:
+    // Enrollment: { user_id: 1, payment_status: 1, course_id: 1 }
+    // CourseLevel: { _id: 1, language_id: 1 }
+    // StudyMaterial: { level_id: 1 }
+    // Language: { _id: 1 }
     const pipeLine = [
       {
         $match: {
@@ -331,13 +329,26 @@ class EnrollmentService {
 
     const data = await Enrollment.aggregate(pipeLine);
     return data;
-
   }
 
   async paypalSuccess(req = {}) {
 
   }
 }
+
+// Ensure indexes for performance (auto-create if missing)
+// async function ensureIndexes() {
+//   try {
+//     await Enrollment.collection.createIndex({ user_id: 1, payment_status: 1, course_id: 1 });
+//     await CourseLevel.collection.createIndex({ _id: 1, status: 1 });
+//     await StudyMaterial.collection.createIndex({ level_id: 1, display_order: 1 });
+//     // Optionally, add more indexes if needed for other lookups
+//   } catch (err) {
+//     console.error("Index creation error:", err);
+//   }
+// }
+// ensureIndexes();
+
 const encrypt = (data) => {
   const iv = crypto.randomBytes(IV_LENGTH);
 

@@ -70,5 +70,6 @@ EnrollmentSchema.index({ instructor_id: 1 });
 EnrollmentSchema.index({ status: 1 });
 EnrollmentSchema.index({ payment_status: 1 });
 EnrollmentSchema.index({ createdAt: -1 });
+EnrollmentSchema.index({ user_id: 1, payment_status: 1, course_id: 1 }); // Compound index for performance on course queries
 
 module.exports = mongoose.model('Enrollment', EnrollmentSchema);

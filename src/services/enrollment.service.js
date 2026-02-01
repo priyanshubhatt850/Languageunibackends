@@ -51,7 +51,7 @@ class EnrollmentService {
   }
   async startPaypalPayment(req = {}) {
     try {
-      const { amount, redirectRoute, levelId, userCountry, ip } = req.body;
+      const { amount, redirectRoute, levelId, userCountry, ip,instructor_id } = req.body;
       let todaysDate = moment().format("YYYY-MM-DD");
       const token = await generateAccessToken();
       let paymentDetails = {
@@ -63,7 +63,22 @@ class EnrollmentService {
         country: userCountry||'',
         userIp: ip||''
       };
+      
+      
       const courseTransactions = await courseTransactionsModel.create(paymentDetails);
+      let coursepaymentDetails = {
+        user_id:req.user._id,
+        instructor_id:instructor_id,
+        course_id:levelId,
+        payment_amount:amount,
+        payment_status:'pending',
+        status:'active',
+        enrolled_date:todaysDate,
+        start_date:todaysDate,
+        courseTransactionId:courseTransactions._id
+      }
+   
+      const enrollment = await Enrollment.create(coursepaymentDetails)
 
       let custom = {
         user_id: req.user._id,

@@ -17,6 +17,7 @@ const EnrollmentSchema = new Schema(
       type: mongoose.Schema.ObjectId,
       ref:"users"
     },
+
     courseTransactionId:{
        type:mongoose.Schema.ObjectId,
         ref:"courseTransactions"

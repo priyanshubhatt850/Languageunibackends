@@ -107,11 +107,13 @@ class FunctionsService {
   }
   async verifyGoogleToken({ googletoken, service_type }) {
     try {
+      console.log("GOOGLE_CLIENT_ID (env):", JSON.stringify(GOOGLE_CLIENT_ID));
+
       const ticket = await googleClient.verifyIdToken({
         idToken: googletoken,
         audience: GOOGLE_CLIENT_ID,
       });
-
+     console.log(ticket,"this is ticekt >>>>>>>>>>>")
       const payload = ticket.getPayload();
       const { email, name, picture, sub } = payload;
 

@@ -6,9 +6,8 @@ const User = require("../models/User");
 const TokenService = require("./token.service");
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 const JWT_EXPIRES_IN = "7d";
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
-
+const { env } = require("../constants");
+const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 function generateOTP() {
   return crypto.randomInt(100000, 1000000).toString();
 }
@@ -107,13 +106,11 @@ class FunctionsService {
   }
   async verifyGoogleToken({ googletoken, service_type }) {
     try {
-      console.log("GOOGLE_CLIENT_ID (env):", JSON.stringify(GOOGLE_CLIENT_ID));
-
+      console.log("GOOGLE_CLIENT_ID from constants:", env.GOOGLE_CLIENT_ID);
       const ticket = await googleClient.verifyIdToken({
         idToken: googletoken,
-        audience: GOOGLE_CLIENT_ID,
+        audience: env.GOOGLE_CLIENT_ID,
       });
-     console.log(ticket,"this is ticekt >>>>>>>>>>>")
       const payload = ticket.getPayload();
       const { email, name, picture, sub } = payload;
 

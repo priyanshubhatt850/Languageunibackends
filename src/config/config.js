@@ -6,12 +6,12 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const envValidation = Joi.object()
     .keys({
-        NODE_ENV: Joi.string().valid('development', 'production', 'test').required(),
+        NODE_ENV: Joi.string().valid('development', 'production', 'test', 'local').required(),
         PORT: Joi.number().default(3000),
         DB_HOST: Joi.string().default('localhost'),
-        DB_USER: Joi.string().required(),
-        DB_PASS: Joi.string().required(),
-        DB_NAME: Joi.string().required(),
+        DB_USER: Joi.string().optional(),
+        DB_PASS: Joi.string().optional(),
+        DB_NAME: Joi.string().optional(),
         JWT_SECRET: Joi.string().required().description('JWT secret key'),
         JWT_ACCESS_EXPIRATION_MINUTES: Joi.number()
             .default(30)
@@ -25,9 +25,9 @@ const envValidation = Joi.object()
         JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: Joi.number()
             .default(10)
             .description('minutes after which verify email token expires'),
-        LOG_FOLDER: Joi.string().required(),
-        LOG_FILE: Joi.string().required(),
-        LOG_LEVEL: Joi.string().required(),
+        LOG_FOLDER: Joi.string().optional(),
+        LOG_FILE: Joi.string().optional(),
+        LOG_LEVEL: Joi.string().optional(),
         REDIS_HOST: Joi.string().default('127.0.0.1'),
         REDIS_PORT: Joi.number().default(6379),
         REDIS_USE_PASSWORD: Joi.string().default('no'),

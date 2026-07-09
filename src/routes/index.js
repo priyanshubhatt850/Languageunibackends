@@ -30,5 +30,6 @@ router.use("/teachingsession", require("./teachingsession.routes"));
 router.use("/userbadge", require("./userbadge.routes"));
 router.use("/userpoints", require("./userpoints.routes"));
 router.use("/wallet", require("./wallet.routes"));
+router.use("/razorpay", require("./razorpay.routes"));
 router.use('/User',require('./user.route'))
 module.exports = router;

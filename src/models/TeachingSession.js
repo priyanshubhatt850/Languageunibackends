@@ -21,6 +21,12 @@ const TeachingSessionSchema = new Schema(
       type: String,
       required: true
     },
+    start_time: {
+      type: Date
+    },
+    end_time: {
+      type: Date
+    },
     hours_taught: {
       type: Number,
       default: 0,

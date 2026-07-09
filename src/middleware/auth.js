@@ -10,8 +10,11 @@ const verifyToken = async (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1];
     console.log(token, "this is token>>>")
     if (!token) return ErrorHandler.Unauthorized();
-    const { _id } = await TokenService.decodedToken(token);
-    let id = _id;
+    const decoded = await TokenService.decodedToken(token);
+    console.log(decoded,"this is decoded")
+    let id = decoded._id;
+    
+    console.log(id,"this is id>>>>>>>")
     const userData = await User.findById(id).lean();
     console.log(token, "this is ima here>>>")
 

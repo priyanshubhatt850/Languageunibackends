@@ -14,5 +14,9 @@ router.put("/:id", teachingsessionController.update);
 router.delete("/:id", teachingsessionController.delete);
 router.post("/filter", teachingsessionController.filter);
 router.post("/", teachingsessionController.create);
+router.get("/active/:instructorId", teachingsessionController.getActiveSession);
+router.post("/start-class", teachingsessionController.startClass);
+router.post("/end-class/:id", teachingsessionController.endClass);
+
 router.post("/deleteMany", teachingsessionController.deleteMany);
 module.exports = router;

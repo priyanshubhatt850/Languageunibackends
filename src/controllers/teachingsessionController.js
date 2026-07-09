@@ -63,6 +63,33 @@ class TeachingSessionController {
       next(err);
     }
   }
+
+  async getActiveSession(req, res, next) {
+    try {
+      const data = await teachingsessionService.getActiveSession(req.params.instructorId);
+      return res.json({ success: true, data });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async startClass(req, res, next) {
+    try {
+      const data = await teachingsessionService.startClass(req.body);
+      return res.json({ success: true, data });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async endClass(req, res, next) {
+    try {
+      const data = await teachingsessionService.endClass(req.params.id);
+      return res.json({ success: true, data });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new TeachingSessionController();

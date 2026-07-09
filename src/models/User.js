@@ -105,6 +105,13 @@ const userSchema = new mongoose.Schema(
       enum: ["active", "pending", "suspended"],
       default: "pending",
     },
+    streak_count: {
+      type: Number,
+      default: 0
+    },
+    last_active_date: {
+      type: String
+    },
 
   },
   {

@@ -15,7 +15,7 @@ function generateOTP() {
 function signToken(user) {
   return jwt.sign(
     {
-      id: user.id,
+      _id: user._id || user.id,
       email: user.email,
       role: user.role,
     },

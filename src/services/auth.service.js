@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
   function signToken(user) {
     return jwt.sign(
       {
-        id: user._id,
+        _id: user._id,
         email: user.email,
         role: user.role,
       },
@@ -30,8 +30,8 @@ const jwt = require("jsonwebtoken");
     async login(email, password) {
       const user = await User.findOne({ email }).select("+password");
       // if (!user) throw new Error("Invalid credentials");
-      if(!user) {
-        return { message: "Invalid credentials"};
+      if (!user) {
+        throw new Error("Invalid credentials");
       }
   
       if (user.disabled) {

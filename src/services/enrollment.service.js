@@ -147,7 +147,7 @@ class EnrollmentService {
   async getcoursematerialDetails(req = {}) {
     try {
       const { levelId } = req.query;
-      const userId = req.user._id;
+      const userId = req.user ? req.user._id : null;
 
       if (!mongoose.Types.ObjectId.isValid(levelId)) {
         return { success: false, message: "Invalid level id" };
@@ -182,7 +182,7 @@ class EnrollmentService {
             from: "enrollments",
             let: {
               levelId: "$_id",
-              userId: new mongoose.Types.ObjectId(userId)
+              userId: userId ? new mongoose.Types.ObjectId(userId) : null
             },
             pipeline: [
               {

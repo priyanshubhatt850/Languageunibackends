@@ -8,7 +8,7 @@ const verifyToken = async (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1];
     if (!token) return ErrorHandler.Unauthorized();
     const { _id } = await TokenService.decodedToken(token);
-    const user = await DbService.findOne(UserModel, { _id, role: 'Admin' });
+    const user = await DbService.findOne(UserModel, { _id, role: 'admin' });
     if (!user) return ErrorHandler.BadRequest(UserMessages.AUTH_NO_USER);
     console.log("email", user.phoneNo); // dont remove this line
     await DbService.update(UserModel, { _id }, { lastActive: new Date() });

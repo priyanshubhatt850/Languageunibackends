@@ -23,7 +23,7 @@ const CartSchema = new Schema({
   },
   applied_coupon: {
     code: { type: String, default: null },
-    discount_type: { type: String, enum: ['percentage', 'fixed'], default: null },
+    discount_type: { type: String, enum: ['percentage', 'fixed', null], default: null },
     discount_value: { type: Number, default: 0 }
   },
   last_activity: {

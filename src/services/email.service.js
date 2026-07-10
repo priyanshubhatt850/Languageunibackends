@@ -1,6 +1,4 @@
-var nodemailer = require("nodemailer");
-const { DbService } = require("../services");
-const { UserModel } = require("../models");
+const nodemailer = require("nodemailer");
 const { env } = require("../constants");
 const fs = require("fs");
 const path = require("path");
@@ -9,8 +7,8 @@ const { promisify } = require("util");
 const readFile = promisify(fs.readFile);
 const _ = require("lodash");
 const emailTemplatePath = path.join(__dirname, "../views/emailTemplates");
-const toEmail = "info@swoofi.com";
-const signature = "Swoofi Team";
+const toEmail = env.GMAIL_USERNAME || "support@globaltongue.com";
+const signature = "Global Tongue Team";
 const transporter = nodemailer.createTransport({
   service: "gmail",
   host: env.EMAIL_HOST,
@@ -22,37 +20,28 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-module.exports.sendMail = function (data) {
+module.exports.sendMail = async function (data) {
   const mailOptions = {
     to: data.to ? data.to : env.GMAIL_USERNAME,
     from: data.from,
     subject: data.subject,
     html: data.html,
   };
+  return transporter.sendMail(mailOptions);
+};
 
-  return new Promise(async (resolve, reject) => {
-    try {
-      const info = await transporter.sendMail(mailOptions);
-      resolve(info);
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-module.exports.contact_to_admin = (emailData) => {
+module.exports.contact_to_admin = async (emailData) => {
+  emailData.subject = "Contact Us";
   return new Promise((resolve, reject) => {
-    try {
-      emailData.subject = "Contact Us";
-      sendMail("contact", emailData, (err, resp) => {
-        resolve(resp);
-      });
-    } catch (error) {
-      reject(error);
-    }
+    sendMail("contact", emailData, (err, resp) => {
+      if (err) return reject(err);
+      resolve(resp);
+    });
   });
 };
+
 module.exports.sendAllMail = async function (data, to, html, subject, from) {
-  let folderPath = path.join(__dirname, "..", "public");
+  const folderPath = path.join(__dirname, "..", "public");
   const content = await readFile(`${folderPath}/templates/${html}`, "utf8");
   const htmlToSend = ejs.render(content, { data });
 
@@ -62,48 +51,35 @@ module.exports.sendAllMail = async function (data, to, html, subject, from) {
     subject: subject,
     html: htmlToSend,
   };
-  return new Promise(async (resolve, reject) => {
-    try {
-      const info = await transporter.sendMail(mailOptions);
-      resolve(info)
-    } catch (error) {
-      reject(error)
-      console.log(error, "this is mail error")
-    }
-  })
+  return transporter.sendMail(mailOptions);
 };
+
 sendMail = (templateName, emailData, cb) => {
   const defaultParams = {
     signature: signature,
-
   };
-  let allParams = _.merge({}, defaultParams, emailData);
+  const allParams = _.merge({}, defaultParams, emailData);
   const filePathContent = emailTemplatePath + "/" + templateName + ".ejs";
   const compiled = ejs.compile(fs.readFileSync(filePathContent, "utf8"));
-  let attach = []; // create an empty array
+  const attach = [];
   if (allParams.attachfile != undefined) {
     attach.push({
       filename: allParams.attachfile,
       path: config.global_url + "uploads/" + allParams.attachfile,
     });
   }
-  const html = compiled(allParams);
-  let mailOptions = {
+  const htmlContent = compiled(allParams);
+  const mailOptions = {
     to: toEmail,
     from: allParams.from,
     subject: allParams.subject,
-    html: html,
+    html: htmlContent,
     attachments: attach,
   };
-  //send mail with defined transport object
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.error("Email Error:", error); // Log the error
-      return cb("Email sending failed", false); // Return an error message
+      return cb("Email sending failed", false);
     }
-
-    // Log success and return it as a response
-    console.log("Email Success");
     return cb("Email sent successfully", true);
   });
 };

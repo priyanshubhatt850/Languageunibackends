@@ -3,6 +3,8 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const cors = require("cors");
+const helmet = require("helmet");
+const { AppError } = require("./utils/AppError");
 //db connection
 global.ObjectId = require("mongoose").Types.ObjectId;
 global.mongoose = require("mongoose");
@@ -15,6 +17,7 @@ const indexRouter = require("./routes/index");
 const app = express();
 
 app.use(cors());
+app.use(helmet());
 logger.token('body', (req) => JSON.stringify(req.body));
 app.use(logger(':method :url :status :response-time ms :date[web] - :body'));
 app.use(express.json({ limit: '2480mb' }));
@@ -30,46 +33,46 @@ const data = app.use("**", (req, res) => {
   res.status(404).json({ success: false, message: "Invalid router" });
 });
 
-global.badReqErr = (err) => {
-  err.statusCode = 400
-  return err
-};
-
 app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || "error";
-  console.log("err", err);
+  console.error("err", err);
 
-  let message = err.message ? err.message : err;
+  if (err instanceof AppError) {
+    const response = { success: false, status: err.status, message: err.message };
+    if (process.env.NODE_ENV === "development") response.stack = err.stack;
+    return res.status(err.statusCode).json(response);
+  }
+
+  if (err.name === "ValidationError" && err.errors) {
+    const messages = Object.values(err.errors).map(e => e.message);
+    return res.status(400).json({ success: false, status: "fail", message: messages.join(", ") });
+  }
 
   if (err.name === "ValidationError") {
-    err.statusCode = 400;
-    message = err?.details[0]?.message || "Validation Error";
+    const message = err?.details?.[0]?.message || "Validation Error";
+    return res.status(400).json({ success: false, status: "fail", message });
   }
+
+  if (err.name === "CastError") {
+    return res.status(400).json({ success: false, status: "fail", message: `Invalid ${err.path}: ${err.value}` });
+  }
+
+  if (err.code === 11000) {
+    const field = Object.keys(err.keyValue).join(", ");
+    return res.status(409).json({ success: false, status: "fail", message: `Duplicate value for: ${field}` });
+  }
+
   if (err.name === "TokenExpiredError") {
-    err.statusCode = 401;
-    // message = "Link expired. Please generate a new one.";
-    message = "Token Expired";
+    return res.status(401).json({ success: false, status: "fail", message: "Token Expired" });
   }
 
   if (err.name === "JsonWebTokenError") {
-    err.statusCode = 401;
-    message = "SignIn Again";
+    return res.status(401).json({ success: false, status: "fail", message: "SignIn Again" });
   }
 
-  if (err.name === "RestException") {
-    return res.status(err.statusCode || 400).json({
-      status: err.status,
-      message: message,
-    });
-  }
-
-  res.status(err.statusCode).json({
-    status: "error",
-    message: message,
-  });
+  const statusCode = err.statusCode || 500;
+  const response = { success: false, status: "error", message: err.message || "Something went wrong" };
+  if (process.env.NODE_ENV === "development") response.stack = err.stack;
+  return res.status(statusCode).json(response);
 });
 
-
-// generateModelsFromJson();
 module.exports = app;

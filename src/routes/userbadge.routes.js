@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Middleware
-// const { authMiddleware } = require("../middleware");
+const { authMiddleware } = require("../middleware");
 
 // Controllers
 const { userbadgeController } = require("../controllers");
@@ -10,9 +10,9 @@ const { userbadgeController } = require("../controllers");
 // Routes
 router.get("/", userbadgeController.list);
 router.get("/:id", userbadgeController.getById);
-router.put("/:id", userbadgeController.update);
-router.delete("/:id", userbadgeController.delete);
+router.put("/:id", authMiddleware, userbadgeController.update);
+router.delete("/:id", authMiddleware, userbadgeController.delete);
 router.post("/filter", userbadgeController.filter);
-router.post("/", userbadgeController.create);
-router.post("/deleteMany", userbadgeController.deleteMany);
+router.post("/", authMiddleware, userbadgeController.create);
+router.post("/deleteMany", authMiddleware, userbadgeController.deleteMany);
 module.exports = router;

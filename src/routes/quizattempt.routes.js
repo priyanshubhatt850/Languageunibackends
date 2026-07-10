@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Middleware
-// const { authMiddleware } = require("../middleware");
+const { authMiddleware } = require("../middleware");
 
 // Controllers
 const { quizattemptController } = require("../controllers");
@@ -10,9 +10,9 @@ const { quizattemptController } = require("../controllers");
 // Routes
 router.get("/", quizattemptController.list);
 router.get("/:id", quizattemptController.getById);
-router.put("/:id", quizattemptController.update);
-router.delete("/:id", quizattemptController.delete);
+router.put("/:id", authMiddleware, quizattemptController.update);
+router.delete("/:id", authMiddleware, quizattemptController.delete);
 router.post("/filter", quizattemptController.filter);
-router.post("/", quizattemptController.create);
-router.post("/deleteMany", quizattemptController.deleteMany);
+router.post("/", authMiddleware, quizattemptController.create);
+router.post("/deleteMany", authMiddleware, quizattemptController.deleteMany);
 module.exports = router;

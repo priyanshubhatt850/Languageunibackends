@@ -2,9 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { env } = require("../constants");
 
-// const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
-console.log(env.JWT_SECRET, "this is jwt secret");
-const JWT_SECRET = env.JWT_SECRET
+const JWT_SECRET = env.JWT_SECRET;
 const JWT_EXPIRES_IN = "7d";
 
 function signToken(user) {
@@ -32,7 +30,7 @@ class AuthService {
 
   async login(email, password) {
     const user = await User.findOne({ email }).select("+password");
-    console.log(user,"this is user ")
+
     // if (!user) throw new Error("Invalid credentials");
     if (!user) {
       throw new Error("Invalid credentials");
@@ -56,8 +54,17 @@ class AuthService {
     const user = await User.findById(userId);
     if (!user) throw new Error("User not found");
 
+    const ALLOWED_FIELDS = [
+      'full_name', 'firstName', 'lastName',
+      'phone', 'phoneNo', 'avatar_url', 'profileImgs',
+      'address', 'city', 'state', 'country', 'countryCode',
+      'learning_languages', 'learning_interests', 'onboarding_completed',
+    ];
+
     Object.keys(data).forEach((key) => {
-      user[key] = data[key];
+      if (ALLOWED_FIELDS.includes(key)) {
+        user[key] = data[key];
+      }
     });
 
     await user.save();

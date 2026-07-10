@@ -29,5 +29,7 @@ module.exports = {
   userbadgeController: require("./userbadgeController"),
   userpointsController: require("./userpointsController"),
   walletController: require("./walletController"),
-  userController: require('./userController')
+  userController: require('./userController'),
+  cartController: require('./cartController'),
+  aichatController: require('./aichatController')
 };

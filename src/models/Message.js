@@ -5,12 +5,12 @@ const MessageSchema = new Schema(
 {
     sender_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     recipient_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     subject: {

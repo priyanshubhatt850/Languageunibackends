@@ -1,28 +1,15 @@
 const crypto = require("crypto");
-const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const otpVerification = require("../models/OTPVerification");
 const User = require("../models/User");
 const TokenService = require("./token.service");
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
-const JWT_EXPIRES_IN = "7d";
 const { env } = require("../constants");
 const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
+
 function generateOTP() {
   return crypto.randomInt(100000, 1000000).toString();
 }
 
-function signToken(user) {
-  return jwt.sign(
-    {
-      _id: user._id || user.id,
-      email: user.email,
-      role: user.role,
-    },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
-  );
-}
 
 class FunctionsService {
   async getOTP(data) {

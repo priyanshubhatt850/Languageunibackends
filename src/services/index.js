@@ -32,4 +32,6 @@ module.exports = {
   TokenService: require("./token.service"),
   DbService: require("./db.service"),
   ErrorHandler: require("./errorHandler.service"),
+  cart: require("./cart.service"),
+  aichat: require("./aichat.service"),
 };

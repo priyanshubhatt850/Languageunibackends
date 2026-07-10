@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Middleware
-// const { authMiddleware } = require("../middleware");
+const { authMiddleware } = require("../middleware");
 
 // Controllers
 const { userController } = require("../controllers");
@@ -10,9 +10,9 @@ const { userController } = require("../controllers");
 // Routes
 router.get("/", userController.list);
 router.get("/:id", userController.getById);
-router.put("/:id", userController.update);
-router.delete("/:id", userController.delete);
+router.put("/:id", authMiddleware, userController.update);
+router.delete("/:id", authMiddleware, userController.delete);
 router.post("/filter", userController.filter);
-router.post("/", userController.create);
-router.post("/deleteMany", userController.deleteMany);
+router.post("/", authMiddleware, userController.create);
+router.post("/deleteMany", authMiddleware, userController.deleteMany);
 module.exports = router;

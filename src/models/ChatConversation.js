@@ -6,12 +6,12 @@ const ChatConversationSchema = new Schema(
 {
     student_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     course_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"courses"
+      ref:"Course"
     },
     subject: {
       type: String,

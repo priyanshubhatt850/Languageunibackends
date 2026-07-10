@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Middleware
-// const { authMiddleware } = require("../middleware");
+const { authMiddleware } = require("../middleware");
 
 // Controllers
 const { reviewController } = require("../controllers");
@@ -10,9 +10,9 @@ const { reviewController } = require("../controllers");
 // Routes
 router.get("/", reviewController.list);
 router.get("/:id", reviewController.getById);
-router.put("/:id", reviewController.update);
-router.delete("/:id", reviewController.delete);
+router.put("/:id", authMiddleware, reviewController.update);
+router.delete("/:id", authMiddleware, reviewController.delete);
 router.post("/filter", reviewController.filter);
-router.post("/", reviewController.create);
-router.post("/deleteMany", reviewController.deleteMany);
+router.post("/", authMiddleware, reviewController.create);
+router.post("/deleteMany", authMiddleware, reviewController.deleteMany);
 module.exports = router;

@@ -8,6 +8,8 @@ const moment = require('moment');
 const axios = require('axios');
 const crypto = require('crypto');
 const { logger } = require('../config/logger');
+const { generateAccessToken } = require('../utils/paypal');
+const { NotFoundError, ConflictError } = require('../utils/AppError');
 
 // Initialize Razorpay instance safely
 let razorpayInstance = null;
@@ -23,26 +25,6 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   }
 }
 
-// PayPal token generation helper
-const generateAccessToken = async () => {
-  try {
-    if (!process.env.Paypal_ClientId || !process.env.Paypal_Secret_Key) {
-      return false;
-    }
-    const auth = Buffer.from(
-      process.env.Paypal_ClientId + ":" + process.env.Paypal_Secret_Key
-    ).toString("base64");
-    const response = await axios.post(
-      `${process.env.Paypal_Api_Url}/v1/oauth2/token`,
-      "grant_type=client_credentials",
-      { headers: { Authorization: `Basic ${auth}` } }
-    );
-    return response?.data?.access_token || false;
-  } catch (error) {
-    console.error("Failed to generate Access Token:", error.message);
-    return false;
-  }
-};
 
 class CartService {
   async getCart(userId) {
@@ -75,6 +57,26 @@ class CartService {
       })
       .lean();
 
+    // Auto-remove unavailable/unpublished courses
+    const activeItems = populated.items.filter(item => item && item.status === 'published');
+    if (activeItems.length !== populated.items.length) {
+      await Cart.findByIdAndUpdate(cart._id, {
+        items: activeItems.map(item => item._id)
+      });
+      populated.items = activeItems;
+    }
+
+    // Auto-calculate totals
+    const subtotal = populated.items.reduce((sum, item) => sum + (item.price || 0), 0);
+    const discount_total = populated.items.reduce((sum, item) => sum + (item.discount_price || item.price || 0), 0);
+    
+    populated.computed = {
+      item_count: populated.items.length,
+      subtotal,
+      discount_total,
+      savings: subtotal - discount_total
+    };
+
     return populated;
   }
 
@@ -84,16 +86,36 @@ class CartService {
       cart = await Cart.create({ user_id: userId, items: [], wishlist: [] });
     }
 
-    const courseObjId = new mongoose.Types.ObjectId(courseId);
-
-    // Duplicate check
-    if (!cart.items.some(id => id.toString() === courseId)) {
-      cart.items.push(courseObjId);
+    // 1. Validate course status
+    const course = await CourseLevel.findById(courseId);
+    if (!course || course.status !== 'published') {
+      throw new NotFoundError('Course Level not found or is currently unavailable');
     }
+
+    // 2. Prevent duplicate courses in cart
+    if (cart.items.some(id => id.toString() === courseId)) {
+      throw new ConflictError('Course is already in your cart');
+    }
+
+    // 3. Prevent already purchased courses from being added
+    const alreadyPurchased = await Enrollment.findOne({
+      user_id: userId,
+      course_id: courseId,
+      status: 'active',
+      payment_status: 'completed'
+    });
+    if (alreadyPurchased) {
+      throw new ConflictError('You have already purchased this course level');
+    }
+
+    const courseObjId = new mongoose.Types.ObjectId(courseId);
+    cart.items.push(courseObjId);
+    
     // Remove from wishlist if it exists there
     cart.wishlist = cart.wishlist.filter(id => id.toString() !== courseId);
+    cart.last_activity = new Date();
+    
     await cart.save();
-
     return this.getCart(userId);
   }
 
@@ -170,21 +192,19 @@ class CartService {
       const courseTransaction = await courseTransactionsModel.create(paymentDetails);
 
       // Create a pending enrollment record for each course in the cart
-      const enrollmentIds = [];
-      for (const item of cart.items) {
-        const enrollment = await Enrollment.create({
-          user_id: userId,
-          instructor_id: item.instructor_id,
-          course_id: item._id,
-          payment_amount: item.discount_price || item.price,
-          payment_status: 'pending',
-          status: 'active',
-          enrolled_date: todaysDate,
-          start_date: todaysDate,
-          courseTransactionId: courseTransaction._id
-        });
-        enrollmentIds.push(enrollment._id.toString());
-      }
+      const enrollmentDocs = cart.items.map(item => ({
+        user_id: userId,
+        instructor_id: item.instructor_id,
+        course_id: item._id,
+        payment_amount: item.discount_price || item.price,
+        payment_status: 'pending',
+        status: 'active',
+        enrolled_date: todaysDate,
+        start_date: todaysDate,
+        courseTransactionId: courseTransaction._id
+      }));
+      const createdEnrollments = await Enrollment.insertMany(enrollmentDocs);
+      const enrollmentIds = createdEnrollments.map(e => e._id.toString());
 
       const customMetadata = {
         user_id: userId.toString(),
@@ -290,21 +310,19 @@ class CartService {
       const courseTransaction = await courseTransactionsModel.create(paymentDetails);
 
       // Create pending enrollments
-      const enrollmentIds = [];
-      for (const item of cart.items) {
-        const enrollment = await Enrollment.create({
-          user_id: userId,
-          instructor_id: item.instructor_id,
-          course_id: item._id,
-          payment_amount: item.discount_price || item.price,
-          payment_status: 'pending',
-          status: 'active',
-          enrolled_date: todaysDate,
-          start_date: todaysDate,
-          courseTransactionId: courseTransaction._id
-        });
-        enrollmentIds.push(enrollment._id.toString());
-      }
+      const enrollmentDocs = cart.items.map(item => ({
+        user_id: userId,
+        instructor_id: item.instructor_id,
+        course_id: item._id,
+        payment_amount: item.discount_price || item.price,
+        payment_status: 'pending',
+        status: 'active',
+        enrolled_date: todaysDate,
+        start_date: todaysDate,
+        courseTransactionId: courseTransaction._id
+      }));
+      const createdEnrollments = await Enrollment.insertMany(enrollmentDocs);
+      const enrollmentIds = createdEnrollments.map(e => e._id.toString());
 
       const customMetadata = {
         user_id: userId.toString(),

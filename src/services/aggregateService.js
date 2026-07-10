@@ -17,39 +17,37 @@ const InstructorWalletTransaction = require('../models/InstructorWalletTransacti
 
 /**
  * Get admin dashboard data
- * Combines: users, courses, enrollments, instructors, notifications
+ * Uses aggregation pipelines instead of loading everything into memory
  */
 const getAdminDashboard = async (userId) => {
-  const [users, courses, enrollments, instructorProfiles, notifications] = await Promise.all([
-    User.find().select('full_name email role avatar_url createdAt').sort('-createdAt'),
-    Course.find().select('title description status createdAt').sort('-createdAt').limit(10),
-    Enrollment.find().select('user_id course_id payment_status payment_amount certificate_issued createdAt'),
-    InstructorProfile.find().select('user_id verification_status rating students_count createdAt').sort('-createdAt'),
-    Notification.find({ user_id: userId }).select('title message read createdAt').sort('-createdAt').limit(10)
+  const [userStats, courseStats, enrollmentStats, recentUsers, notifications] = await Promise.all([
+    User.aggregate([{ $group: { _id: '$role', count: { $sum: 1 } } }]),
+    Course.aggregate([{ $facet: { total: [{ $count: 'count' }], byStatus: [{ $group: { _id: '$status', count: { $sum: 1 } } }] } }]),
+    Enrollment.aggregate([{ $facet: {
+      total: [{ $count: 'count' }],
+      revenue: [{ $match: { payment_status: 'completed' } }, { $group: { _id: null, total: { $sum: '$payment_amount' } } }],
+      recent: [{ $sort: { createdAt: -1 } }, { $limit: 5 }, { $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'student' } }, { $unwind: { path: '$student', preserveNullAndEmptyArrays: true } }]
+    }}]),
+    User.find().sort({ createdAt: -1 }).limit(5).select('full_name email role createdAt avatar_url').lean(),
+    Notification.find({ user_id: userId }).sort({ createdAt: -1 }).limit(10).lean()
   ]);
 
-  // Aggregate calculations
-  const dashboard = {
+  const roleCounts = {};
+  userStats.forEach(r => { roleCounts[r._id] = r.count; });
+
+  return {
     stats: {
-      total_users: users.length,
-      total_students: users.filter(u => u.role === 'student' || !u.role).length,
-      total_instructors: users.filter(u => u.role === 'instructor').length,
-      total_courses: courses.length,
-      total_enrollments: enrollments.length,
-      pending_instructors: instructorProfiles.filter(p => p.verification_status === 'pending').length,
-      total_revenue: enrollments
-        .filter(e => e.payment_status === 'completed')
-        .reduce((sum, e) => sum + (e.payment_amount || 0), 0),
-      completed_enrollments: enrollments.filter(e => e.payment_status === 'completed').length
+      totalStudents: roleCounts['student'] || 0,
+      totalInstructors: roleCounts['instructor'] || 0,
+      totalUsers: Object.values(roleCounts).reduce((a, b) => a + b, 0),
+      totalCourses: courseStats[0]?.total[0]?.count || 0,
+      totalEnrollments: enrollmentStats[0]?.total[0]?.count || 0,
+      totalRevenue: enrollmentStats[0]?.revenue[0]?.total || 0,
     },
-    recent_users: users.slice(0, 5),
-    recent_courses: courses,
-    recent_enrollments: enrollments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5),
-    instructor_profiles: instructorProfiles.slice(0, 5),
+    recentEnrollments: enrollmentStats[0]?.recent || [],
+    recentUsers,
     notifications
   };
-
-  return dashboard;
 };
 
 /**
@@ -80,14 +78,12 @@ const getAdminStudents = async (page = 1, limit = 10, search = '') => {
     })
   ]);
 
-  // Get related data for all students in one query
   const studentIds = students.map(s => s._id);
   const [enrollments, progress] = await Promise.all([
     Enrollment.find({ user_id: { $in: studentIds } }),
     StudentCourseLevelProgress.find({ user_id: { $in: studentIds } })
   ]);
 
-  // Attach related data to each student
   const enrichedStudents = students.map(student => ({
     ...student.toObject(),
     enrollment_count: enrollments.filter(e => e.user_id.toString() === student._id.toString()).length,
@@ -123,7 +119,6 @@ const getAdminInstructors = async (page = 1, limit = 10, status = 'all') => {
     InstructorProfile.countDocuments(statusFilter)
   ]);
 
-  // Get related data for all instructors
   const instructorIds = instructorProfiles.map(p => p.user_id);
   const [users, ratings, courses] = await Promise.all([
     User.find({ _id: { $in: instructorIds } }).select('full_name email avatar_url'),
@@ -131,7 +126,6 @@ const getAdminInstructors = async (page = 1, limit = 10, status = 'all') => {
     Course.find({ instructor_id: { $in: instructorIds } })
   ]);
 
-  // Create lookup maps
   const userMap = new Map(users.map(u => [u._id.toString(), u]));
   const ratingMap = new Map();
   ratings.forEach(r => {
@@ -141,7 +135,6 @@ const getAdminInstructors = async (page = 1, limit = 10, status = 'all') => {
     ratingMap.get(r.instructor_id.toString()).push(r);
   });
 
-  // Enrich instructor data
   const enrichedInstructors = instructorProfiles.map(profile => {
     const user = userMap.get(profile.user_id.toString());
     const profileRatings = ratingMap.get(profile.user_id.toString()) || [];
@@ -206,11 +199,10 @@ const getCourseDetail = async (courseId) => {
  * Get language overview with courses and levels
  */
 const getLanguageOverview = async (languageId) => {
-  const [language, courses, courseLevels, enrollments] = await Promise.all([
+  const [language, courses, courseLevels] = await Promise.all([
     Language.findById(languageId),
     Course.find({ language_id: languageId }),
-    CourseLevel.find({ language_id: languageId }),
-    Enrollment.find()
+    CourseLevel.find({ language_id: languageId })
   ]);
 
   if (!language) {
@@ -218,7 +210,7 @@ const getLanguageOverview = async (languageId) => {
   }
 
   const courseIds = courses.map(c => c._id);
-  const languageEnrollments = enrollments.filter(e => courseIds.includes(e.course_id));
+  const languageEnrollments = await Enrollment.find({ course_id: { $in: courseIds } });
 
   return {
     language: language.toObject(),
@@ -237,15 +229,14 @@ const getLanguageOverview = async (languageId) => {
  * Get instructor dashboard with courses, students, and earnings
  */
 const getInstructorDashboard = async (instructorId) => {
-  const [profile, courses, enrollments, transactions] = await Promise.all([
+  const [profile, courses, transactions] = await Promise.all([
     InstructorProfile.findOne({ user_id: instructorId }),
     Course.find({ instructor_id: instructorId }),
-    Enrollment.find(),
     InstructorWalletTransaction.find({ instructor_id: instructorId })
   ]);
 
   const courseIds = courses.map(c => c._id);
-  const courseEnrollments = enrollments.filter(e => courseIds.includes(e.course_id));
+  const courseEnrollments = await Enrollment.find({ course_id: { $in: courseIds } });
 
   return {
     profile: profile?.toObject() || null,
@@ -278,8 +269,8 @@ const getStudentProgress = async (studentId) => {
   const courses = await Course.find({ _id: { $in: courseIds } });
 
   const enrichedEnrollments = enrollments.map(enrollment => {
-    const course = courses.find(c => c._id === enrollment.course_id);
-    const levelProgress = progress.filter(p => p.enrollment_id.toString() === enrollment._id.toString());
+    const course = courses.find(c => c._id.toString() === enrollment.course_id.toString());
+    const levelProgress = progress.filter(p => p.enrollment_id?.toString() === enrollment._id.toString());
 
     return {
       ...enrollment.toObject(),

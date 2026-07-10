@@ -45,7 +45,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
     },
     facebookId: String,
-    googleId: String,
     appleIdentifier: String,
     socialType: String,
 
@@ -68,7 +67,6 @@ const userSchema = new mongoose.Schema(
 
     avatar: {
       type: mongoose.Schema.ObjectId,
-      ref: "attribute",
     },
     loginType: {
       type: String,

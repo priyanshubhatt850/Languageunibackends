@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Middleware
-// const { authMiddleware } = require("../middleware");
+const { authMiddleware } = require("../middleware");
 
 // Controllers
 const { exerciseController } = require("../controllers");
@@ -10,9 +10,9 @@ const { exerciseController } = require("../controllers");
 // Routes
 router.get("/", exerciseController.list);
 router.get("/:id", exerciseController.getById);
-router.put("/:id", exerciseController.update);
-router.delete("/:id", exerciseController.delete);
+router.put("/:id", authMiddleware, exerciseController.update);
+router.delete("/:id", authMiddleware, exerciseController.delete);
 router.post("/filter", exerciseController.filter);
-router.post("/", exerciseController.create);
-router.post("/deleteMany", exerciseController.deleteMany);
+router.post("/", authMiddleware, exerciseController.create);
+router.post("/deleteMany", authMiddleware, exerciseController.deleteMany);
 module.exports = router;

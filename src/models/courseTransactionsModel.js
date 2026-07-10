@@ -7,15 +7,15 @@ courseTransactionsSchema = new Schema(
     {
         user_id: {
             type: mongoose.Schema.ObjectId,
-            ref: "users"
+            ref: "User"
         },
         courseId: {
             type: mongoose.Schema.ObjectId,
-            ref: "courses"
+            ref: "Course"
         },
         levelId: {
             type: mongoose.Schema.ObjectId,
-            ref: "courselevels"
+            ref: "CourseLevel"
         },
         transaction_id: {
             type: String
@@ -24,7 +24,7 @@ courseTransactionsSchema = new Schema(
             type: Number,
 
         },
-        discout_price: {
+        discount_price: {
             type: Number
         },
         payment_type: {

@@ -5,12 +5,12 @@ const TeachingSessionSchema = new Schema(
 {
     instructor_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     student_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
     },
     course_level_id: {
       type: mongoose.Schema.ObjectId,

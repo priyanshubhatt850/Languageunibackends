@@ -1,95 +1,26 @@
-const teachingsessionService = require("../services/teachingsession.service");
+const BaseController = require('./BaseController');
+const catchAsync = require('../utils/catchAsync');
+const service = require('../services/teachingsession.service');
 
-class TeachingSessionController {
-  async list(req, res, next) {
-    try {
-      const data = await teachingsessionService.list(req.query);
-      return res.json(data);
-    } catch (err) {
-      next(err);
-    }
+class TeachingSessionController extends BaseController {
+  constructor() {
+    super(service);
   }
 
-  async filter(req, res, next) {
-    try {
-      const data = await teachingsessionService.filter(req.body, req.query);
-      return res.json(data);
-    } catch (err) {
-      next(err);
-    }
-  }
+  getActiveSession = catchAsync(async (req, res) => {
+    const data = await service.getActiveSession(req.params.instructorId);
+    return res.json({ success: true, data });
+  });
 
-  async getById(req, res, next) {
-    try {
-      const data = await teachingsessionService.getById(req.params.id);
-      return res.json(data);
-    } catch (err) {
-      next(err);
-    }
-  }
+  startClass = catchAsync(async (req, res) => {
+    const data = await service.startClass(req.body);
+    return res.json({ success: true, data });
+  });
 
-  async create(req, res, next) {
-    try {
-      const data = await teachingsessionService.create(req.body);
-      return res.json(data);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async update(req, res, next) {
-    try {
-      const data = await teachingsessionService.update(req.params.id, req.body);
-      return res.json(data);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async delete(req, res, next) {
-    try {
-      const data = await teachingsessionService.delete(req.params.id);
-      return res.json(data);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async deleteMany(req, res, next) {
-    try {
-      const data = await teachingsessionService.deleteMany(req.body);
-      return res.json(data);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async getActiveSession(req, res, next) {
-    try {
-      const data = await teachingsessionService.getActiveSession(req.params.instructorId);
-      return res.json({ success: true, data });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async startClass(req, res, next) {
-    try {
-      const data = await teachingsessionService.startClass(req.body);
-      return res.json({ success: true, data });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async endClass(req, res, next) {
-    try {
-      const data = await teachingsessionService.endClass(req.params.id);
-      return res.json({ success: true, data });
-    } catch (err) {
-      next(err);
-    }
-  }
+  endClass = catchAsync(async (req, res) => {
+    const data = await service.endClass(req.params.id);
+    return res.json({ success: true, data });
+  });
 }
 
 module.exports = new TeachingSessionController();

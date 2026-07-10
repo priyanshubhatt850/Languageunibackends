@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Middleware
-// const { authMiddleware } = require("../middleware");
+const { authMiddleware } = require("../middleware");
 
 // Controllers
 const { studentmaterialbookmarkController } = require("../controllers");
@@ -10,9 +10,9 @@ const { studentmaterialbookmarkController } = require("../controllers");
 // Routes
 router.get("/", studentmaterialbookmarkController.list);
 router.get("/:id", studentmaterialbookmarkController.getById);
-router.put("/:id", studentmaterialbookmarkController.update);
-router.delete("/:id", studentmaterialbookmarkController.delete);
+router.put("/:id", authMiddleware, studentmaterialbookmarkController.update);
+router.delete("/:id", authMiddleware, studentmaterialbookmarkController.delete);
 router.post("/filter", studentmaterialbookmarkController.filter);
-router.post("/", studentmaterialbookmarkController.create);
-router.post("/deleteMany", studentmaterialbookmarkController.deleteMany);
+router.post("/", authMiddleware, studentmaterialbookmarkController.create);
+router.post("/deleteMany", authMiddleware, studentmaterialbookmarkController.deleteMany);
 module.exports = router;

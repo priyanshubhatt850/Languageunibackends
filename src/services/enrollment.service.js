@@ -6,6 +6,7 @@ const moment = require('moment')
 const paypal = require('paypal-rest-sdk');
 const axios = require("axios");
 const mongoose = require("mongoose");
+const { generateAccessToken } = require('../utils/paypal');
 const crypto = require("crypto");
 const ALGORITHM = "aes-256-cbc";
 const KEY = Buffer.from(process.env.MATERIAL_ENCRYPTION_KEY, "utf8"); // 32 bytes
@@ -147,7 +148,7 @@ class EnrollmentService {
   async getcoursematerialDetails(req = {}) {
     try {
       const { levelId } = req.query;
-      const userId = req.user._id;
+      const userId = req.user ? req.user._id : null;
 
       if (!mongoose.Types.ObjectId.isValid(levelId)) {
         return { success: false, message: "Invalid level id" };
@@ -182,7 +183,7 @@ class EnrollmentService {
             from: "enrollments",
             let: {
               levelId: "$_id",
-              userId: new mongoose.Types.ObjectId(userId)
+              userId: userId ? new mongoose.Types.ObjectId(userId) : null
             },
             pipeline: [
               {
@@ -363,28 +364,5 @@ const encrypt = (data) => {
 };
 
 
-const generateAccessToken = async () => {
-  try {
-    if (!process.env.Paypal_ClientId || !process.env.Paypal_Secret_Key) {
-      logger.error({ message: "Missing Paypal Credentials." });
-      return false;
-    }
-    const auth = Buffer.from(
-      process.env.Paypal_ClientId + ":" + process.env.Paypal_Secret_Key
-    ).toString("base64");
-    const response = await axios.post(
-      `${process.env.Paypal_Api_Url}/v1/oauth2/token`,
-      "grant_type=client_credentials",
-      { headers: { Authorization: `Basic ${auth}` } }
-    );
-    if (!response?.data?.access_token) {
-      logger.error({ message: "Token not generated." });
-      return false;
-    }
-    return response.data.access_token;
-  } catch (error) {
-    console.error("Failed to generate Access Token:", error.message);
-    return false;
-  }
-};
+
 module.exports = new EnrollmentService();

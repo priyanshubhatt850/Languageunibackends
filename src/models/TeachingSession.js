@@ -5,12 +5,12 @@ const TeachingSessionSchema = new Schema(
 {
     instructor_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     student_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
     },
     course_level_id: {
       type: mongoose.Schema.ObjectId,
@@ -20,6 +20,12 @@ const TeachingSessionSchema = new Schema(
     session_date: {
       type: String,
       required: true
+    },
+    start_time: {
+      type: Date
+    },
+    end_time: {
+      type: Date
     },
     hours_taught: {
       type: Number,

@@ -5,7 +5,7 @@ const CourseLevelSchema = new Schema(
 {
     language_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"languages",
+      ref:"Language",
       required: true
     },
     level_name: {

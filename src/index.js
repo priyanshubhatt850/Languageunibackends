@@ -1,5 +1,6 @@
 const app = require('./app');
 const config = require('./config/config');
+const { ensureIndexes } = require('./utils/indexes');
 
 console.log('Hello Node-Express-Mysql with Sequelize Boilerplate!!');
 require('./cronJobs');
@@ -16,4 +17,5 @@ require('./config/rootSocket')(io);
 server.listen(config.port, () => {
     console.log('SERVER');
     console.log(`Listening to port ${config.port}`);
+    ensureIndexes().catch(console.error);
 });

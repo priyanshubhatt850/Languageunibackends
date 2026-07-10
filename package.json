@@ -30,6 +30,7 @@
     "firebase-admin": "^11.10.1",
     "geoip-lite": "^1.4.10",
     "google-auth-library": "^9.15.1",
+    "helmet": "^8.2.0",
     "joi": "^17.7.0",
     "joi-objectid": "^4.0.2",
     "jsonwebtoken": "^8.5.1",
@@ -49,9 +50,11 @@
     "passport-local": "^1.0.0",
     "passport-twitter-oauth2": "^2.1.1",
     "paypal-rest-sdk": "^1.8.1",
+    "razorpay": "^2.9.6",
     "seed": "^0.4.4",
     "socket.io": "^4.5.4",
     "twilio": "^4.10.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
   }
 }

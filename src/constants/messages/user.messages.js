@@ -38,7 +38,7 @@ const CMSMessages = {
   UPDATE_MEETING: "Your Meeting has been updated",
   CONFIRMED_MEETING: "Your Meeting has been confirmed",
   DECLINED_MEETING: "Your Meeting has been declined",
-  NOT_FOUND_EMAIL: "This email address is not registered with Tranquil",
+  NOT_FOUND_EMAIL: "This email address is not registered with Global Tongue",
   OTP_EXPIRED: "The OTP has expired. Please request a new OTP.",
   CONTACT_ADD: "Thank you for contacting us! Your message has been successfully submitted. We appreciate your interest and will get back to you as soon as possible.",
 

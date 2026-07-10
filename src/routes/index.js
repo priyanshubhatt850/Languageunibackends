@@ -30,5 +30,9 @@ router.use("/teachingsession", require("./teachingsession.routes"));
 router.use("/userbadge", require("./userbadge.routes"));
 router.use("/userpoints", require("./userpoints.routes"));
 router.use("/wallet", require("./wallet.routes"));
-router.use('/User',require('./user.route'))
+router.use("/razorpay", require("./razorpay.routes"));
+router.use("/aggregate", require("./aggregate"));
+router.use('/User',require('./user.route'));
+router.use("/cart", require("./cart.routes"));
+router.use("/aichat", require("./aichat.routes"));
 module.exports = router;

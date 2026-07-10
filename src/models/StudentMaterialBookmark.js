@@ -5,12 +5,12 @@ const StudentMaterialBookmarkSchema = new Schema(
 {
     user_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     material_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"studyMaterials",
+      ref:"StudyMaterial",
       required: true
     },
     level_id: {

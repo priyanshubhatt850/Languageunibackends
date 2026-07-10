@@ -5,12 +5,12 @@ const UserBadgeSchema = new Schema(
 {
     user_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     badge_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"Badges",
+      ref:"Badge",
       required: true
     },
     earned_date: {

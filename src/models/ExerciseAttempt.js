@@ -10,7 +10,7 @@ const ExerciseAttemptSchema = new Schema(
     },
     user_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     level_id: {

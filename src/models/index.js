@@ -29,4 +29,6 @@ module.exports = {
   UserModel: require('./User'),
   OTPVerification: require("./OTPVerification"),
   CourseTransaction: require("./courseTransactionsModel"),
+  Cart: require("./Cart"),
+  AIChatHistory: require("./AIChatHistory"),
 };

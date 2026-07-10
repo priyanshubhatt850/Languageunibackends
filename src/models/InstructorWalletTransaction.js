@@ -5,7 +5,7 @@ const InstructorWalletTransactionSchema = new Schema(
 {
     instructor_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     amount: {

@@ -5,17 +5,17 @@ const EnrollmentSchema = new Schema(
 {
     user_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users",
+      ref:"User",
       required: true
     },
     course_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"courses",
+      ref:"Course",
       required: true
     },
     instructor_id: {
       type: mongoose.Schema.ObjectId,
-      ref:"users"
+      ref:"User"
     },
 
     courseTransactionId:{
